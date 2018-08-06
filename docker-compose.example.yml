@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  flask-web:
+    build: ./web
+    container_name: flask_web
+    ports:
+      - "5000:5000"
+    working_dir: /app
+    volumes:
+      - ./web:/app
+    links:
+      - flask-db
+    entrypoint:
+      - python
+    command: "app.py"
+    env_file:
+      - ./database.env
+      - ./goodreads.env
+
+  flask-db:
+    image: postgres:latest
+    container_name: flask_db
+    ports:
+      - "54320:5432"
+    volumes:
+      - ./flask-db:/var/lib/postgresql
+    environment:
+      - POSTGRES_USER=
+      - POSTGRES_PASSWORD=

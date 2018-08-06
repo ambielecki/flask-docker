@@ -1,0 +1,38 @@
+{% with errors = get_flashed_messages(category_filter=["error_message"]) %}
+{% with successes = get_flashed_messages(category_filter=["success_message"]) %}
+
+<div class="container">
+    {% if errors %}
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="alert alert-danger alert-dismissible block-content">
+                    <button class="close" data-dismiss="alert" type="button">&times;</button>
+                    <div class="block-content"><p>There was a problem handling your request:</p></div>
+                    <ul>
+                        {% for error_message in errors %}
+                            <li>{{ error_message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if successes %}
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="alert alert-success alert-dismissible block-content">
+                    <button class="close" data-dismiss="alert" type="button">&times;</button>
+                    <ul>
+                        {% for success_message in successes %}
+                            <li>{{ success_message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% endwith %}
+{% endwith %}

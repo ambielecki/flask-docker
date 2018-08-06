@@ -1,0 +1,6 @@
+Flask==1.0
+flask-bcrypt
+Flask-Session
+psycopg2
+requests
+SQLAlchemy
