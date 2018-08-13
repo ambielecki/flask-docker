@@ -5,11 +5,57 @@
 {% endblock %}
 
 {% block body %}
-    <div class="container">
+    <div class="container" id="index_target">
         <div class="row">
             <div class="col-sm-12">
-                <h1>Welcome to Project 1</h1>
+                <h1>Book List</h1>
+                <form id="options" v-on:submit.prevent>
+                    <div class="form-group row">
+                        <label for="search" class="col-sm-2 col-form-label">Search</label>
+                        <div class="col-sm-3">
+                            <input v-model="options.search" type="text" name="search" id="search" class="form-control" v-on:keyup="updateList">
+                        </div>
+
+                        <label for="limit" class="col-sm-1 col-form-label">Limit</label>
+                        <div class="col-sm-2">
+                            <select v-model="options.limit" name="limit" id="limit" class="form-control">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="100">100</option>
+                                <option value="500">500</option>
+                            </select>
+                        </div>
+
+                        <label for="page" class="col-sm-1 col-form-label">Page</label>
+                        <div class="col-sm-2">
+                            <input v-model="options.page" type="text" name="page" id="page" class="form-control">
+                        </div>
+
+                        <div class="col-sm-1">
+                            <button class="btn" v-on:click="updateList">Submit</button>
+                        </div>
+                    </div>
+                </form>
+
+                <table v-if="books" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>ISBN</th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Year</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr is="index_table_row" v-for="book in books" :book="book"></tr>
+                    </tbody>
+                </table>
+
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascript %}
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 {% endblock %}

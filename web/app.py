@@ -12,6 +12,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import \
     scoped_session, \
     sessionmaker
+import json
 import os
 import requests
 
@@ -40,6 +41,95 @@ bcrypt = Bcrypt(app)
 @app.route('/')
 def home():
     return render_template("index.html")
+
+
+@app.route('/books/<int:id>')
+def view(id):
+    book = db.execute("SELECT * FROM books WHERE id=:id", {"id": id}).first()
+    count = 0
+    average = 'N/A'
+    if book:
+        count_query = db.execute("SELECT count(id) as count FROM reviews WHERE book_id=:id", {"id": id}).first()
+
+        if count_query.count:
+            count = count_query.count
+            average_query = db.execute("SELECT AVG(stars) as average FROM reviews WHERE book_id=:id", {"id": id}).first()
+
+            if average_query.average:
+                average = round(average_query.average, 1)
+
+    return render_template("books/view.html", book=book, review_count=count, review_average=average)
+
+
+# API Routes
+@app.route('/api/books', methods=["POST"])
+def books():
+    body = request.json
+
+    limit = 100
+    if body['limit']:
+        limit = int(body['limit'])
+
+    search = ''
+    if body['search']:
+        search = body['search'].lower()
+    search = '%' + search + '%'
+
+    page = 1
+    if body['page']:
+        page = int(body['page'])
+
+    offset = limit * (page - 1)
+
+    books_response = []
+    books = db.execute("SELECT * FROM books WHERE LOWER(author) LIKE :search OR lower(title) LIKE :search ORDER BY title ASC LIMIT :limit OFFSET :offset", {
+        "search": search,
+        "limit": limit,
+        "offset": offset
+    }).fetchall()
+
+    for book in books:
+        books_response.append(dict(book.items()))
+
+    return json.dumps({
+        'books': books_response
+    })
+
+
+@app.route('/api/<string:isbn>')
+def api(isbn):
+    book = db.execute("SELECT * FROM books WHERE isbn=:isbn", {"isbn": isbn}).first()
+    if book:
+        reviews = db.execute("SELECT * FROM reviews WHERE book_id=:book_id", {"book_id": book.id})
+        review_response = []
+        review_count = 0
+        review_total_stars = 0
+
+        for review in reviews:
+            review_count += 1
+            review_total_stars += review.stars
+
+            review_response.append(dict(review.items()))
+
+        if review_count != 0:
+            review_average_stars = round(review_total_stars / review_count, 1)
+        else:
+            review_average_stars = 'N/A'
+
+        response = {
+            'isbn': book.isbn,
+            'title': book.title,
+            'author': book.author,
+            'year': book.year,
+            'reviews': review_response,
+            'review_count': review_count,
+            'review_average_stars': review_average_stars
+        }
+
+        return json.dumps(response)
+    else:
+        return '404'
+
 
 # Auth Related Routes
 @app.route('/register', methods=["GET", "POST"])

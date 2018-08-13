@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    View Book
+{% endblock %}
+
+{% block body %}
+    <p>{{ book.title }}</p>
+    <p>{{ review_count }}</p>
+    <p>{{ review_average }}</p>
+{% endblock %}
